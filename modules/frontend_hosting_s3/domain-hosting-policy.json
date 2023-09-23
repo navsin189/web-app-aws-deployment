@@ -2,17 +2,16 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "tfStateFileOperation",
+            "Sid": "AllowIPAccess",
             "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::${account_id}:user/${iam_user_name}"
-            },
-            "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:DeleteObject"
-            ],
-            "Resource": "arn:aws:s3:::${bucket}/*"
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::${bucket}/*",
+            "Condition": {
+                "IpAddress": {
+                    "aws:SourceIp": "${public_ip}"
+                }
+            }
         }
     ]
 }
