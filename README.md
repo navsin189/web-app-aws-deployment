@@ -1,5 +1,8 @@
 # Three tier Cloud Architecture via Terraform
 
+Terraform is a tool that provides the ability to manage infrastructure through scripts while being the single source of truth. In other words, is an infrastructure as code tool that lets you define both cloud and on-prem resources in human-readable configuration files that you can version, reuse, and share.
+[Terraform Modules](https://blog.devops.dev/terraform-modules-db392bb7e950) has been used in this project increasing the readibility and is easy to understand.
+
 ## Summary
 
 - The application is divided in three parts and hosted on AWS.
@@ -11,7 +14,7 @@
 
 - A custom VPC with
   - different subnets for EC2 instances and RDS.
-  - An intergate gateway for EC2 instances.
+  - An internet gateway for EC2 instances.
 - An EC2 Instance
   - provisioning haproxy and rsyslog.
   - having backend service uploaded automatically.
@@ -22,7 +25,7 @@
   - not public.
 
 Haproxy will be configured for frontend and RDS.
-![Architecture](./diagram/three_tier_architecture.png)
+![Architecture](./diagram/three_tier_architecture.jpg)
 
 ### Completed
 
@@ -53,3 +56,22 @@ Haproxy will be configured for frontend and RDS.
 - [terraform binary](https://www.terraform.io/downloads)
 - add terraform path into environment variable to have global access.
 - terraform will use your aws credential to talk to AWS.
+
+### Getting Started
+
+- Clone the repo
+- open the directory from any text editor.
+- populate the secrets.tfvars.template file with actual values for the mentioned keys.
+- Rename the secrets.tfvars.template to secrets.tfvars
+- Change any values if you want.
+
+```
+git clone https://github.com/navsin189/getting-started-with-terraform.git terraform
+cd terraform
+update the secret file
+mv secrets.tfvars.template secrets.tfvars
+terrform init
+terraform plan -var-file secrets.tfvars
+# if no error
+terraform apply -var-file secrets.tfvars
+```
