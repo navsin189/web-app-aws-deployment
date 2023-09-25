@@ -1,4 +1,4 @@
 .terraform/*
 *lock*
 *state*
-*tfvars
+secrets.tfvars

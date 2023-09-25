@@ -1,44 +1,51 @@
 data "aws_eips" "backend_eip" {
-  tags =  {
-     attached = "ec2 instance"
+  tags = {
+    attached = "ec2 instance"
   }
 }
 
 resource "aws_instance" "backend_ec2" {
   availability_zone = var.av_zone
-  ami           = var.ami
-  instance_type = var.instance_type
+  ami               = var.ami
+  instance_type     = var.instance_type
   # count         = var.ec2_instance_count
-  subnet_id     = var.ec2_subnet_id
+  subnet_id                   = var.ec2_subnet_id
   associate_public_ip_address = true
-  key_name = aws_key_pair.backend_ec2_key_pair.id
-  vpc_security_group_ids = [aws_security_group.backend_ec2_security_group.id]
+  key_name                    = aws_key_pair.backend_ec2_key_pair.id
+  vpc_security_group_ids      = [aws_security_group.backend_ec2_security_group.id]
   tags = {
-    instance_name     = "backend with haproxy"
-    environment       = "production"
-    component         = "backend"
+    instance_name = "backend with haproxy"
+    environment   = "production"
+    component     = "backend"
+  }
+  connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    private_key = file(var.private_key_pair) #please pass your key path
+    host        = aws_instance.backend_ec2.public_ip
   }
   provisioner "file" {
-    source      = templatefile("./modules/ec2/file/haproxy.cfg", { website_endpoint = var.website_endpoint})
-    destination = "/home/"
+    source      = "./modules/ec2/files/haproxy.cfg"
+    destination = "/home/ec2-user/haproxy.cfg"
   }
   provisioner "file" {
-    source      = "./modules/ec2/file/rsyslog.conf"
-    destination = "/home/"
+    source      = "./modules/ec2/files/rsyslog.conf"
+    destination = "/home/ec2-user/rsyslog.conf"
   }
   provisioner "file" {
-    source      = "./modules/ec2/file/kickstart.sh"
-    destination = "/home/"
+    source      = "./modules/ec2/files/kickstart.sh"
+    destination = "/home/ec2-user/kickstart.sh"
   }
   provisioner "remote-exec" {
     inline = [
-      
+      "sed -i s/website_endpoint/${var.website_endpoint}/g /home/ec2-user/haproxy.cfg",
+      "sh /home/ec2-user/kickstart.sh"
     ]
   }
 }
 
 resource "aws_key_pair" "backend_ec2_key_pair" {
-  key_name   = "aws_ec2"
+  key_name   = "id_rsa"
   public_key = file(var.key_pair)
 }
 
@@ -76,38 +83,38 @@ resource "aws_security_group" "backend_ec2_security_group" {
   description = "Allow TLS inbound traffic"
 
   ingress {
-    description      = "frontend"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+    description = "frontend"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
-  # ingress {
-  #   description      = "backend"
-  #   from_port        = 8000
-  #   to_port          = 8880
-  #   protocol         = "tcp"
-  #   cidr_blocks      = [var.cidr_block]
-  # }
-  # ingress {
-  #   description      = "db"
-  #   from_port        = 3302
-  #   to_port          = 5432
-  #   protocol         = "tcp"
-  #   cidr_blocks      = [var.cidr_block]
-  # }
   ingress {
-    description     = "ssh"
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
-    cidr_blocks     = ["0.0.0.0/0"]
+    description = "backend"
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    description = "db"
+    from_port   = 3302
+    to_port     = 3302
+    protocol    = "tcp"
+    cidr_blocks = [var.cidr_block]
+  }
+  ingress {
+    description = "ssh"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
@@ -116,7 +123,7 @@ resource "aws_security_group" "backend_ec2_security_group" {
 }
 
 output "public_ip" {
-  value     =  aws_eip_association.backend_ec2_eip_association.public_ip
+  value = aws_eip_association.backend_ec2_eip_association.public_ip
 }
 
 output "allocation_ids" {

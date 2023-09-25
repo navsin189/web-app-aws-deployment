@@ -12,3 +12,8 @@ variable "av_zone" {
   type        = string
   description = "Availability zone"
 }
+
+variable "rds_subnet_cdir_block" {
+  type        = list(string)
+  description = "list of subnets"
+}

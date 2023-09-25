@@ -40,10 +40,12 @@ Haproxy will be configured for frontend and RDS.
 - Single EC2 instance has been brought up where
   - haproxy and rsyslog got configured manually.
   - Frontend is accessible on port 80.
+- Amazon RDS for PostgreSQL has been setup
+  - that is only accessible from EC2 instances.
 
 ### In Progress
 
-- installing & provisioning haproxy and rsyslog conf by replacing original.
+- Manually the HaProxy has been setup. Now trying to automate.
 
 ---
 
@@ -74,4 +76,17 @@ terrform init
 terraform plan -var-file secrets.tfvars
 # if no error
 terraform apply -var-file secrets.tfvars
+```
+
+- Some AWS commands
+
+```
+# sync your files to S3 bucket.
+aws s3 sync file_path/directory_path s3://<bucket_name>
+
+# to delete a file
+aws s3 rm s3://<bucket_name>/<file>
+
+# to delete all
+aws s3 rm s3://<bucket_name>/ --resursive
 ```

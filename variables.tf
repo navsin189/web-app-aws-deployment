@@ -57,3 +57,34 @@ variable "key_pair" {
   sensitive   = true
   description = "key to login in ec2 instance"
 }
+
+variable "private_key_pair" {
+  type        = string
+  sensitive   = true
+  description = "key to login in ec2 instance"
+}
+
+variable "db_username" {
+  type        = string
+  sensitive   = true
+  description = "database username"
+}
+
+variable "db_password" {
+  type        = string
+  sensitive   = true
+  description = "database password"
+}
+variable "db_name" {
+  type        = string
+  sensitive   = true
+  description = "database name"
+}
+variable "rds_subnet_cdir_block" {
+  type        = list(string)
+  description = "list of subnets"
+  default = [
+    "10.2.2.0/24",
+    "10.2.3.0/24",
+  ]
+}

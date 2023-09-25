@@ -40,3 +40,7 @@ variable "website_endpoint" {
   type        = string
   description = "S3 bucket endpoint for haproxy"
 }
+variable "private_key_pair" {
+  type        = string
+  description = "key to login in ec2 instance"
+}
